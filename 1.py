@@ -3,6 +3,26 @@ import os
 import json
 import xml.etree.ElementTree as ET
 import zipfile
+import psutil
+
+def list_logical_disks():
+    """Вывод информации о логических дисках."""
+    try:
+        print("Информация о логических дисках:")
+        for partition in psutil.disk_partitions():
+            print(f"Диск: {partition.device}")
+            print(f"  Метка тома: {partition.mountpoint}")
+            print(f"  Тип файловой системы: {partition.fstype}")
+            try:
+                usage = psutil.disk_usage(partition.mountpoint)
+                print(f"  Размер: {usage.total / (1024**3):.2f} GB")
+                print(f"  Занято: {usage.used / (1024**3):.2f} GB")
+                print(f"  Доступно: {usage.free / (1024**3):.2f} GB")
+            except PermissionError:
+                print("  Недостаточно прав для получения информации.")
+            print()
+    except Exception as e:
+        print(f"Ошибка получения информации о логических дисках: {e}")
 
 def list_files(directory):
     try:
@@ -122,27 +142,32 @@ def unzip(zip_path, extract_path):
 
 def main():
     directory = "/Users/User/Desktop/Безопасное ПО"
-    
+
     while True:
         print("\nДействия:")
-        print("1) Список файлов")
-        print("2) Написать .txt")
-        print("3) Прочитать .txt")
-        print("4) Удалить .txt")
-        print("5) Создать .json")
-        print("6) Прочитать .json")
-        print("7) Удалить .json")
-        print("8) Создать .xml")
-        print("9) Прочитать .xml")
-        print("10) Удалить .xml")
-        print("11) Заархивировать в .zip")
-        print("12) Разархивировать")
-        print("13) Завершить работу программы")
-        
-        choice = input("Выберите действие (1-13): ")
-        
+        print("1) Информация о логических дисках")
+        print("2) Список файлов")
+        print("3) Написать .txt")
+        print("4) Прочитать .txt")
+        print("5) Удалить .txt")
+        print("6) Создать .json")
+        print("7) Прочитать .json")
+        print("8) Удалить .json")
+        print("9) Создать .xml")
+        print("10) Прочитать .xml")
+        print("11) Удалить .xml")
+        print("12) Заархивировать в .zip")
+        print("13) Разархивировать")
+        print("14) Завершить работу программы")
+
+        choice = input("Выберите действие (1-14): ")
+
         if choice == '1':
-            print("--------Чтение файлов--------")  
+            print("--------Информация о логических дисках--------")
+            list_logical_disks()
+            input("--------Нажмите enter для продолжения--------")
+        elif choice == '2':
+            print("--------Чтение файлов--------")
             files = list_files(directory)
             if files:
                 print("Найденные файлы:")
@@ -150,56 +175,56 @@ def main():
                     print(f"{i}. {file}")
             input("--------Нажмите enter для продолжения--------")
             
-        elif choice == '2':
+        elif choice == '3':
             print("--------Написание .txt--------") 
             filename = input("Введите название файла: ")
             content = input("Введите содержимое файла: ")
             write_to_file(os.path.join(directory, f"{filename}.txt"), content)
             input("--------Нажмите enter для продолжения--------")
             
-        elif choice == '3':
+        elif choice == '4':
             filename = input("Введите название файла (без расширения): ")
             read_file(os.path.join(directory, f"{filename}.txt"))
             input("--------Нажмите enter для продолжения--------")
             
-        elif choice == '4':
+        elif choice == '5':
             filename = input("Введите название файла (без расширения): ")
             delete_file(os.path.join(directory, f"{filename}.txt"))
             input("--------Нажмите enter для продолжения--------")
             
-        elif choice == '5':
+        elif choice == '6':
             filename = input("Введите название файла (без расширения): ")
             data = {"name": "John Doe", "age": 30, "email": "john.doe@example.com"}
             create_json(os.path.join(directory, f"{filename}.json"), data)
             input("--------Нажмите enter для продолжения--------")
             
-        elif choice == '6':
+        elif choice == '7':
             filename = input("Введите название файла (без расширения): ")
             read_json(os.path.join(directory, f"{filename}.json"))
             input("--------Нажмите enter для продолжения--------")
             
-        elif choice == '7':
+        elif choice == '8':
             filename = input("Введите название файла (без расширения): ")
             delete_json(os.path.join(directory, f"{filename}.json"))
             input("--------Нажмите enter для продолжения--------")
             
-        elif choice == '8':
+        elif choice == '9':
             filename = input("Введите название файла (без расширения): ")
             data = input("Введите содержимое для XML: ")
             create_xml(os.path.join(directory, f"{filename}.xml"), data)
             input("--------Нажмите enter для продолжения--------")
             
-        elif choice == '9':
+        elif choice == '10':
             filename = input("Введите название файла (без расширения): ")
             read_xml(os.path.join(directory, f"{filename}.xml"))
             input("--------Нажмите enter для продолжения--------")
             
-        elif choice == '10':
+        elif choice == '11':
             filename = input("Введите название файла (без расширения): ")
             delete_xml(os.path.join(directory, f"{filename}.xml"))
             input("--------Нажмите enter для продолжения--------")
             
-        elif choice == '11':
+        elif choice == '12':
             zip_filename = input("Введите название zip-файла (без расширения): ")
             print("Выберите файлы для записи в zip (введите номера через пробел):")
             files_to_zip = list_files(directory)
@@ -215,13 +240,13 @@ def main():
             create_zip(os.path.join(directory, f"{zip_filename}.zip"), file_paths)
             input("--------Нажмите enter для продолжения--------")
             
-        elif choice == '12':
+        elif choice == '13':
             input("--------Разархивирование--------")
             zip_filename = input("Введите название разархивируемого файла: ")
             unzip(os.path.join(directory, f"{zip_filename}.zip"), directory)
             input("--------Нажмите enter для продолжения--------")
             
-        elif choice == '13':
+        elif choice == '14':
             input("--------Завершение работы программы--------")
             break
             
